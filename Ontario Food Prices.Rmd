@@ -233,6 +233,27 @@ frozen_pizza_forecasts
 
 Perhaps the frozen pizza prices were forecasted to be very similar over the next year, because historically, there hadn't been drastic variation in the prices. The standard deviation of the pizza prices was only $0.17. Perhaps the companies can keep the price of the frozen pizza more consistent because they can get a bulk deal on ingredients like flour and tomato sauce, which are available all year round, and can be stored for relatively long periods of time. Also, they can mass produce frozen pizza using industrial equipment in factories regardless of the season. 
 
+# Bacon
+
+The prices are for each unit of bacon, which weighs 500 grams. This is approximately the weight of a regular package of bacon.
+
+```{r}
+plot.ts(bacon)
+lines(lowess(bacon))
+```
+```{r}
+auto.arima(bacon)
+tsdiag(auto.arima(bacon))
+```
+
+```{r}
+forecast(auto.arima(bacon),14)-> bacondf
+bacon_forecasts <- cbind(bacondf$mean, bacondf$lower[,2], bacondf$upper[,2])
+colnames(bacon_forecasts) <- c("Forecasted Bacon Price", "Lower bound 95% CI", "Upper bound 95% CI")
+bacon_forecasts
+```
+
+
 # Avocado
 
 ```{r}
