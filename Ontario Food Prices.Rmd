@@ -234,6 +234,8 @@ summary(frozen_pizza_sarima)
 tsdiag(frozen_pizza_sarima)
 ```
 
+We forecast the frozen pizza prices for the next 14 months.
+
 ```{r}
 forecast(frozen_pizza_sarima, 14)
 ```
