@@ -196,6 +196,8 @@ strawberry_forecasts
 
 Statistics Canada collected data on prices for every 390 g of frozen pizzas. Frozen pizzas are available in a wide variety of sizes and ingredients, so these prices are standardized before they are averaged. Note that the unit weight of 390 grams is closer to the weight of a single thin crust frozen pizza, than the weight of a single thick crust frozen pizza or a deep dish frozen pizza.
 
+We note that on average, the frozen pizza prices have increased slightly over time. There doesn't seem to be a lot of drastic change as the standard deviation for the pizza prices is only around $0.17.
+
 ```{r}
 plot.ts(frozen_pizza)
 lines(lowess(frozen_pizza), col="red")
@@ -204,7 +206,11 @@ lines(lowess(frozen_pizza), col="red")
 ```{r}
 plot.ts(diff(frozen_pizza))
 adf.test(diff(frozen_pizza))
+acf(diff(frozen_pizza))
+pacf(diff(frozen_pizza))
 ```
+
+We build a SARIMA model for the frozen pizza prices. It turns out that an ARIMA(0,1,1) model is the best. 
 
 ```{r}
 frozen_pizza_sarima <- auto.arima(frozen_pizza)
@@ -225,7 +231,7 @@ colnames(frozen_pizza_forecasts) <- c("Forecasted Frozen Pizza Price", "Lower bo
 frozen_pizza_forecasts
 ```
 
-Perhaps the frozen pizza prices were forecasted to be very similar over the next year, because historically, there hadn't been drastic variation in the prices. The standard deviation of the pizza prices was only \$0.17. Perhaps the companies can keep the price of the frozen pizza more consistent because they can get a bulk deal on ingredients like flour and tomato sauce, which are available all year round, and can be stored for relatively long periods of time. Also, they can mass produce frozen pizza using industrial equipment in factories regardless of the season. 
+Perhaps the frozen pizza prices were forecasted to be very similar over the next year, because historically, there hadn't been drastic variation in the prices. The standard deviation of the pizza prices was only $0.17. Perhaps the companies can keep the price of the frozen pizza more consistent because they can get a bulk deal on ingredients like flour and tomato sauce, which are available all year round, and can be stored for relatively long periods of time. Also, they can mass produce frozen pizza using industrial equipment in factories regardless of the season. 
 
 # Avocado
 
