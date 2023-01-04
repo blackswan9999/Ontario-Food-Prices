@@ -192,28 +192,6 @@ strawberry_forecasts
 
 # Analysis and Forecasting of strawberry Prices using ARMA-GARCH Model
 
-
-```{r}
-acf(avocado)
-pacf(avocado)
-```
-
-
-
-
-```{r}
-plot.ts(cantaloupe)
-lines(lowess(cantaloupe), col = "red")
-
-plot.ts(diff(cantaloupe))
-lines(lowess(diff(cantaloupe)), col = "red")
-```
-```{r}
-acf(cantaloupe)
-pacf(cantaloupe)
-```
-
-
 # Frozen Pizza Prices Forecasting Using SARIMA
 
 Statistics Canada collected data on prices for every 390 g of frozen pizzas. Frozen pizzas are available in a wide variety of sizes and ingredients, so these prices are standardized before they are averaged. Note that the unit weight of 390 grams is closer to the weight of a single thin crust frozen pizza, than the weight of a single thick crust frozen pizza or a deep dish frozen pizza.
@@ -248,3 +226,27 @@ frozen_pizza_forecasts
 ```
 
 Perhaps the frozen pizza prices were forecasted to be very similar over the next year, because historically, there hadn't been drastic variation in the prices. The standard deviation of the pizza prices was only \$0.17. Perhaps the companies can keep the price of the frozen pizza more consistent because they can get a bulk deal on ingredients like flour and tomato sauce, which are available all year round, and can be stored for relatively long periods of time. Also, they can mass produce frozen pizza using industrial equipment in factories regardless of the season. 
+
+# Avocado
+
+```{r}
+acf(avocado)
+pacf(avocado)
+```
+
+
+# Cantaloupe
+
+```{r}
+plot.ts(cantaloupe)
+lines(lowess(cantaloupe), col = "red")
+
+plot.ts(diff(cantaloupe))
+lines(lowess(diff(cantaloupe)), col = "red")
+```
+```{r}
+acf(cantaloupe)
+pacf(cantaloupe)
+```
+
+
