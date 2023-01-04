@@ -1,0 +1,248 @@
+---
+title: Using SARIMA Models to Forecast Ontario Retail Food Prices Based on Jan 2017
+  - Oct 2022 Data
+author: "Alice Huang"
+date: "20/12/2022"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+```{r include=FALSE}
+library(tseries)
+library(astsa)
+library(forecast)
+library(tidyverse)
+```
+
+```{r warning=FALSE, include=FALSE}
+data <- read.csv("statscan_foodprices_jan2017_to_oct2022.csv")
+# some column values were originally stored as strings for some reason so they were converted to numeric data type
+data[,2] <- as.numeric(data[,2])
+data[,3] <- as.numeric(data[,3])
+data[,4] <- as.numeric(data[,4])
+# just_data has each column being the prices for each food item, since R ts() function wants column vectors as inputs
+just_data <- t(data[,2:71])
+```
+
+```{r include=FALSE}
+# converting the dataframe columns to time series objects
+beef_stewing <- ts(just_data[,1], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+beef_striploin <- ts(just_data[,2], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+beef_top_sirloin <- ts(just_data[,3], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+beef_rib <- ts(just_data[,4], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+beef_ground <- ts(just_data[,5], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+pork_loin <- ts(just_data[,6], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+pork_rib <- ts(just_data[,7], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+pork_shoulder <- ts(just_data[,8], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+chicken_whole <- ts(just_data[,9], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+chicken_breast <- ts(just_data[,10], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+chicken_thigh <- ts(just_data[,11], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+chicken_drumstick <- ts(just_data[,12], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+bacon <- ts(just_data[,13], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+wiener <- ts(just_data[,14], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+salmon <- ts(just_data[,15], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+shrimp <- ts(just_data[,16], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_salmon <- ts(just_data[,17], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_tuna <- ts(just_data[,18], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+meatless_burger <- ts(just_data[,19], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+milk_1L <- ts(just_data[,20], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+milk_2L <- ts(just_data[,21], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+milk_4L <- ts(just_data[,22], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+soy_milk <- ts(just_data[,23], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+nut_milk <- ts(just_data[,24], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+cream <- ts(just_data[,25], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+butter <- ts(just_data[,26], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+margarine <- ts(just_data[,27], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+block_cheese <- ts(just_data[,28], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+yogurt <- ts(just_data[,29], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+eggs_dozen <- ts(just_data[,30], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+apple <- ts(just_data[,31], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+oranges_kg <- ts(just_data[,32], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+oranges_1.36kg <- ts(just_data[,33], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+banana <- ts(just_data[,34], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+pear <- ts(just_data[,35], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+lemon <- ts(just_data[,36], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+lime <- ts(just_data[,37], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+grape <- ts(just_data[,38], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+cantaloupe <- ts(just_data[,39], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+strawberry <- ts(just_data[,40], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+avocado <- ts(just_data[,41], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+potatoes_4.54kg <- ts(just_data[,42], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+potatoes_kg <- ts(just_data[,43], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+sweet_potatoes_kg <- ts(just_data[,44], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+tomato <- ts(just_data[,45], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+cabbage <- ts(just_data[,46], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+carrots <- ts(just_data[,47], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+onion_kg <- ts(just_data[,48], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+onion_1.36kg <- ts(just_data[,49], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+celery <- ts(just_data[50], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+cucumber <- ts(just_data[,51], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+mushroom <- ts(just_data[,52], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+iceberg_lettuce <- ts(just_data[,53], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+romaine_lettuce <- ts(just_data[,54], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+broccoli <- ts(just_data[,55], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+peppers <- ts(just_data[,56], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+squash <- ts(just_data[,57], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+salad_greens <- ts(just_data[,58], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_french_fries <- ts(just_data[,59], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_green_beans <- ts(just_data[,60], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_broccoli <- ts(just_data[,61], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_corn <- ts(just_data[,62], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_mixed_vegetables <- ts(just_data[,63], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_peas <- ts(just_data[,64], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_pizza <- ts(just_data[,65], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_spinach <- ts(just_data[,66], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+frozen_strawberries <- ts(just_data[,67], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+white_bread <- ts(just_data[,68], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+flatbread_and_pita <- ts(just_data[,69], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+crackers_and_crisp_breads <- ts(just_data[,70], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+cookies_and_sweet_biscuits <- ts(just_data[,71], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+pasta_dry_or_fresh <- ts(just_data[,72], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+rice_brown <- ts(just_data[,73], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+rice_white <- ts(just_data[,74], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+cereal <- ts(just_data[,75], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+wheat_flour <- ts(just_data[,76], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+white_sugar <- ts(just_data[,77], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+apple_juice <- ts(just_data[,78], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+orange_juice <- ts(just_data[,79], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+coffee_roasted_or_ground <- ts(just_data[,80], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+tea <- ts(just_data[,81], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+ketchup <- ts(just_data[,82], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+vegetable_oil <- ts(just_data[,83], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canola_oil <- ts(just_data[,84], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+olive_oil <- ts(just_data[,85], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+baby_food <- ts(just_data[,86], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+infant_formula <- ts(just_data[,87], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+peanut_butter <- ts(just_data[,88], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+mayonnaise <- ts(just_data[,89], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_baked_beans <- ts(just_data[,90], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_tomatoes <- ts(just_data[,91], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_soup <- ts(just_data[,92], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_beans_and_lentils <- ts(just_data[,93], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_corn <- ts(just_data[,94], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_peach <- ts(just_data[,95], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+canned_pear <- ts(just_data[,96], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+dried_lentils <- ts(just_data[,97], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+dry_beans_and_legumes <- ts(just_data[,98], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+tofu <- ts(just_data[,99], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+hummus <- ts(just_data[,100], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+salsa <- ts(just_data[,101], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+pasta_sauce <- ts(just_data[,102], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+salad_dressing <- ts(just_data[,103], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+almonds <- ts(just_data[,104], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+peanuts <- ts(just_data[,105], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+sunflower_seeds <- ts(just_data[,106], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+deodorant <- ts(just_data[,107], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+toothpaste <- ts(just_data[,108], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+shampoo <- ts(just_data[,109], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+laundry_detergent <- ts(just_data[,110], frequency = 12, start = c(2017, 1), end = c(2022, 10))
+```
+
+# Analysis and Forecasting of strawberry Prices using SARIMA Model
+
+The prices of the strawberries in the dataset are for 454 g of strawberries. Most supermarket chains sell strawberries in clear plastic boxes which contain 454 grams of strawberries each, so this corresponds to the most common unit that Ontario shoppers will buy strawberries in. 
+
+## Summary Plots for Strawberry Prices
+The monthly strawberry prices show an increasing trend over time. The monthly strawberry prices appear to be seasonal, with a period of 12 months. Many strawberries in Ontario supermarkets come from the brand Driscoll's, which grows strawberries in California. According to the US Department of Agriculture, the peak growing season for strawberries in California is around April-November. The seasonality is consistent with strawberry growing season. Generally, strawberries are only in season during the summer each year. During the winter months, when the strawberries are not in season, the prices are higher. During the summer months, when the strawberries are in season, the prices are lower.
+
+```{r}
+plot.ts(strawberry)
+lines(lowess(strawberry), col="red")
+```
+
+Since the prices show an increasing trend, the data are not stationary. Since SARIMA models assume that the data are stationary, we transform the data so that it is stationary. The strawberry prices appear to be volatile so we take the log of the strawberry prices. Since the trend appears to be linear, we difference the data. We perform seasonal differencing since the data appears to show seasonality. The transformed data appears to have a horizontal trend. We use Dickey-Fuller test to test the null hypothesis that the transformed data is not stationary against the alternative hypothesis that the transformed data is stationary. Since the p-value is smaller than 0.05, we have more evidence that the transformed data is stationary.
+
+```{r}
+strawberry_transformed <- diff(log(strawberry), lag=12)
+plot.ts(strawberry_transformed)
+lines(lowess(strawberry_transformed), col="red")
+adf.test(strawberry_transformed)
+```
+
+In the acf plot of the  transformed strawberry prices, there appears to be some seasonal behaviour with period 12 months. We seem to have significant autocorrelation at lag 12, and possibly significant autocorrelation at lag 24.
+
+The pacf plot seems to cut off after lag 10.
+
+```{r}
+acf(strawberry_transformed, lag.max = 48)
+pacf(strawberry_transformed, lag.max = 48)
+```
+
+## SARIMA model for strawberry prices
+
+We use auto.arima() to find the best SARIMA model for the log of the strawberry prices. It turns out that a ARIMA$(0,0,0)\times(1,1,0)_{12}$ with drift is the best.
+
+```{r}
+log_strawberry_sarima <- auto.arima(log(strawberry))
+log_strawberry_sarima
+tsdiag(log_strawberry_sarima)
+```
+
+The residuals appear to be white noise, because the ACF of the residuals has no spikes outside the trivial spike at lag 0. Ljung-Box test tests the null hypothesis that the residuals are white noise against the alternative hypothesis that the residuals are not white noise. Since the p-values for Ljung-Box statistic are higher than 0.05, we do not reject the null hypothesis that the residuals are white noise.
+
+## Forecasted strawberry prices using SARIMA
+
+```{r}
+forecast(log_strawberry_sarima, 14) -> forecast_log_strawberrydf
+strawberry_forecasts <- cbind(exp(forecast_log_strawberrydf$mean), exp(forecast_log_strawberrydf$lower[,2]), exp(forecast_log_strawberrydf$upper[,2]))
+colnames(strawberry_forecasts) <- c("Forecasted Strawberry Price", "Lower bound 95% CI", "Upper bound 95% CI")
+strawberry_forecasts
+```
+
+# Analysis and Forecasting of strawberry Prices using ARMA-GARCH Model
+
+
+```{r}
+acf(avocado)
+pacf(avocado)
+```
+
+
+
+
+```{r}
+plot.ts(cantaloupe)
+lines(lowess(cantaloupe), col = "red")
+
+plot.ts(diff(cantaloupe))
+lines(lowess(diff(cantaloupe)), col = "red")
+```
+```{r}
+acf(cantaloupe)
+pacf(cantaloupe)
+```
+
+
+# Frozen Pizza Prices Forecasting Using SARIMA
+
+Statistics Canada collected data on prices for every 390 g of frozen pizzas. Frozen pizzas are available in a wide variety of sizes and ingredients, so these prices are standardized before they are averaged. Note that the unit weight of 390 grams is closer to the weight of a single thin crust frozen pizza, than the weight of a single thick crust frozen pizza or a deep dish frozen pizza.
+
+```{r}
+plot.ts(frozen_pizza)
+lines(lowess(frozen_pizza), col="red")
+```
+
+```{r}
+plot.ts(diff(frozen_pizza))
+adf.test(diff(frozen_pizza))
+```
+
+```{r}
+frozen_pizza_sarima <- auto.arima(frozen_pizza)
+summary(frozen_pizza_sarima)
+tsdiag(frozen_pizza_sarima)
+```
+
+```{r}
+forecast(frozen_pizza_sarima, 14)
+```
+
+```{r}
+forecast(frozen_pizza_sarima, 14)-> forecast_frozen_pizzadf
+frozen_pizza_forecasts <- cbind(forecast_frozen_pizzadf$mean, forecast_frozen_pizzadf$lower[,2], forecast_frozen_pizzadf$upper[,2])
+colnames(frozen_pizza_forecasts) <- c("Forecasted Frozen Pizza Price", "Lower bound 95% CI", "Upper bound 95% CI")
+frozen_pizza_forecasts
+```
+
+Perhaps the frozen pizza prices were forecasted to be very similar over the next year, because historically, there hadn't been drastic variation in the prices. The standard deviation of the pizza prices was only \$0.17. Perhaps the companies can keep the price of the frozen pizza more consistent because they can get a bulk deal on ingredients like flour and tomato sauce, which are available all year round, and can be stored for relatively long periods of time. Also, they can mass produce frozen pizza using industrial equipment in factories regardless of the season. 
