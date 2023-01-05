@@ -8,6 +8,12 @@ output:
     df_print: paged
   pdf_document: default
 ---
+
+# Data Sources and Methodology for Collection
+
+The monthly data for Ontario grocery prices were taken from Statistics Canada. Statistics Canada took these prices from transaction data at Ontario retailers. The transaction data gives a comprehensive electronic record of the description of groceries, quantity of groceries purchased, and prices paid. Prices were usually collected for the most common unit of purchase. For example, prices were displayed for a dozen of eggs rather than a single egg. If grocery items were sold in different package sizes, the varying sizes were averaged, and the prices were reported for the averaged package size. Grocery prices were then averaged among the transactions.
+
+
 ```{r include=FALSE}
 library(tseries)
 library(astsa)
@@ -257,8 +263,18 @@ bacon_forecasts
 # Avocado
 
 ```{r}
+plot.ts(avocado)
+lines(lowess(avocado), col="green")
 acf(avocado)
 pacf(avocado)
+```
+
+```{r}
+auto.arima(avocado)
+```
+
+```{r}
+forecast(auto.arima(avocado), 14)
 ```
 
 
@@ -276,4 +292,9 @@ acf(cantaloupe)
 pacf(cantaloupe)
 ```
 
+# References
 
+Economic Research Service U.S. Department of Agriculture. (2021). U.S. fresh strawberry production expands with newer varieties. Retrieved January 4, 2023, from https://www.ers.usda.gov/data-products/chart-gallery/gallery/chart-detail/?chartId=101156 
+
+Statistics Canada. Table 18-10-0245-01  Monthly average retail prices for selected products
+DOI: https://doi.datacite.org/dois/10.25318%2F1810024501-eng
